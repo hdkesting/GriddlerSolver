@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace GriddlerSolver
 {
@@ -15,9 +12,7 @@ namespace GriddlerSolver
             Width = columnClues.Length;
             ColumnClues = columnClues;
             RowClues = rowClues;
-            Grid = new bool?[Width, Height];
-            //        SetValue(1,2, true);
-            //        SetValue(1,3, false);
+            Grid = new bool?[Height, Width];
         }
 
         public Griddler(string columnClues, string rowClues)
@@ -31,7 +26,7 @@ namespace GriddlerSolver
 
             this.ColumnClues = cols.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
             this.RowClues = rows.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
-            Grid = new bool?[Width, Height];
+            Grid = new bool?[Height, Width];
         }
 
         public int Height { get; }

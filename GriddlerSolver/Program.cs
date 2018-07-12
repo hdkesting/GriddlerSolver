@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GriddlerSolver
 {
@@ -10,10 +6,12 @@ namespace GriddlerSolver
     {
         static void Main(string[] args)
         {
-            var game = new Griddler("1; 3; 3; 10; 1,1; 1,1; 1,1,1; 1,1,3; 1,1,3; 10",
-                    "7; 1,1; 7; 1,1; 1,1; 1,1; 1,1; 3,3; 4,4; 3,3");
+            var apricot = new Griddler("1,1,7; 2,3,2; 2,2,3,6; 1,1,4,2,3; 1,4,2,2,3;" + "3,5,1,2; 2,1,2,3; 4,1,4,2,1,1; 2,4,2,1,4; 3,2,4,2;" +
+                "2,1,1,4,2; 2,1,1,1,1,5; 3,1,2,4; 3,2,2,2; 2,7",
+                "3,6; 14; 1,5,2; 4,1,1; 2,1,2;" + "1,2,4; 2,2,3,2; 1,2,1,1,2; 1,2,1,1,1,1; 3,1,1,1,1;" +
+                "2,2,1,1,3; 1,3,2,1,2; 1,2,2,3,1,1; 1,2,6; 1,1,7;" + "1,1,4; 2,1,1,1; 3,3,2; 4,3; 6");
 
-            var solver = new Solver(game);
+            var solver = new Solver(apricot);
 
             foreach (var partial in solver.Solve())
             {
