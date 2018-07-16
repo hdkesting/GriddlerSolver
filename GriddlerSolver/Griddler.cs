@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace GriddlerSolver
@@ -13,6 +14,8 @@ namespace GriddlerSolver
             ColumnClues = columnClues;
             RowClues = rowClues;
             Grid = new bool?[Height, Width];
+
+            SanityCheck(ColumnClues, RowClues);
         }
 
         public Griddler(string columnClues, string rowClues)
@@ -27,6 +30,8 @@ namespace GriddlerSolver
             this.ColumnClues = cols.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
             this.RowClues = rows.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
             Grid = new bool?[Height, Width];
+
+            SanityCheck(ColumnClues, RowClues);
         }
 
         public int Height { get; }
@@ -92,7 +97,17 @@ namespace GriddlerSolver
             }
 
             return sb.ToString();
+        }
 
+        private static void SanityCheck(int[][] columnClues, int[][] rowClues)
+        {
+            var colblacks = columnClues.Select(a => a.Sum()).Sum();
+            var rowblacks = rowClues.Select(a => a.Sum()).Sum();
+
+            if (colblacks != rowblacks)
+            {
+                throw new InvalidOperationException("The number of black fields must match between rows and columns.");
+            }
         }
     }
 }

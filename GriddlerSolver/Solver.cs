@@ -35,6 +35,12 @@ namespace GriddlerSolver
                 var pattern = group == GroupType.Column ? game.ColumnClues[index] : game.RowClues[index];
                 var existing = game.GetGroup(group, index);
 
+                if (existing.All(x => x.HasValue))
+                {
+                    // nothing left to do, just skip
+                    continue;
+                }
+
                 var options = MakePermutations(pattern, game.GetGroupSize(group))
                     .Where(p => MatchesExisting(p, existing))
                     .ToList();
@@ -46,7 +52,7 @@ namespace GriddlerSolver
                 // if value was changed, then add both column and row to queue
                 if (options.Any())
                 {
-                    var merged = Merge(options);
+                    var merged = this.Merge(options);
 
                     for (int i = 0; i < merged.Length; i++)
                     {
@@ -76,10 +82,10 @@ namespace GriddlerSolver
             }
         }
 
-        bool?[] Merge(IList<bool[]> options)
+        private bool?[] Merge(IList<bool[]> options)
         {
             // start with the first one
-            var result = options[0].Select(b => (bool?)b).ToArray();
+            var result = options.First().Select(b => (bool?)b).ToArray();
 
             // erase all non-matching values
             foreach (var option in options.Skip(1))
