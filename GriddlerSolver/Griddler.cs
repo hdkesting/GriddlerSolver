@@ -7,10 +7,11 @@ namespace GriddlerSolver
     internal class Griddler
     {
         // horizontal = horizontally laid out, so about columns
-        public Griddler(int[][] columnClues, int[][] rowClues)
+        public Griddler(string name, int[][] columnClues, int[][] rowClues)
         {
             Height = rowClues.Length;
             Width = columnClues.Length;
+            this.Name = name;
             ColumnClues = columnClues;
             RowClues = rowClues;
             Grid = new bool?[Height, Width];
@@ -18,7 +19,7 @@ namespace GriddlerSolver
             SanityCheck(ColumnClues, RowClues);
         }
 
-        public Griddler(string columnClues, string rowClues)
+        public Griddler(string name, string columnClues, string rowClues)
         {
             // do NOT ignore empty parts!
             var cols = columnClues.Split(';').Select(s => s.Trim()).ToArray();
@@ -32,10 +33,12 @@ namespace GriddlerSolver
             Grid = new bool?[Height, Width];
 
             SanityCheck(ColumnClues, RowClues);
+            this.Name = name;
         }
 
         public int Height { get; }
         public int Width { get; }
+        public string Name { get; }
 
         // about columns
         public int[][] ColumnClues { get; }
