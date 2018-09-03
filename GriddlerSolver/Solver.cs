@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GriddlerSolver
 {
@@ -10,6 +7,8 @@ namespace GriddlerSolver
     {
         private readonly Queue<LineDefinition> processQueue = new Queue<LineDefinition>();
         private readonly Griddler game;
+
+        public double Completeness => game.Completeness;
 
         public Solver(Griddler griddler)
         {

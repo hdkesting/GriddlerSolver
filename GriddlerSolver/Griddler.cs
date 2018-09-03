@@ -6,47 +6,120 @@ namespace GriddlerSolver
 {
     internal class Griddler
     {
-        // horizontal = horizontally laid out, so about columns
-        public Griddler(string name, int[][] columnClues, int[][] rowClues)
+        public Griddler(string name, int columns, int rows)
         {
-            Height = rowClues.Length;
-            Width = columnClues.Length;
             this.Name = name;
-            ColumnClues = columnClues;
-            RowClues = rowClues;
-            Grid = new bool?[Height, Width];
-
-            SanityCheck(ColumnClues, RowClues);
+            this.Height = rows;
+            this.Width = columns;
+            this.Grid = new bool?[this.Height, this.Width];
         }
 
-        public Griddler(string name, string columnClues, string rowClues)
-        {
-            // do NOT ignore empty parts!
-            var cols = columnClues.Split(';').Select(s => s.Trim()).ToArray();
-            var rows = rowClues.Split(';').Select(s => s.Trim()).ToArray();
+        //// horizontal = horizontally laid out, so about columns
+        //private Griddler(string name, int[][] columnClues, int[][] rowClues)
+        //{
+        //    this.Height = rowClues.Length;
+        //    this.Width = columnClues.Length;
+        //    this.Name = name;
+        //    this.ColumnClues = columnClues;
+        //    this.RowClues = rowClues;
+        //    this.Grid = new bool?[this.Height, this.Width];
 
-            this.Height = rows.Length;
-            this.Width = cols.Length;
+        //    this.SanityCheck(this.ColumnClues, this.RowClues);
+        //}
 
-            this.ColumnClues = cols.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
-            this.RowClues = rows.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
-            Grid = new bool?[Height, Width];
+        //private Griddler(string name, string columnClues, string rowClues)
+        //{
+        //    // do NOT ignore empty parts!
+        //    var cols = columnClues.Split(';').Select(s => s.Trim()).ToArray();
+        //    var rows = rowClues.Split(';').Select(s => s.Trim()).ToArray();
 
-            SanityCheck(ColumnClues, RowClues);
-            this.Name = name;
-        }
+        //    this.Height = rows.Length;
+        //    this.Width = cols.Length;
+
+        //    this.ColumnClues = cols.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
+        //    this.RowClues = rows.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
+        //    this.Grid = new bool?[this.Height, this.Width];
+
+        //    this.SanityCheck(this.ColumnClues, this.RowClues);
+        //    this.Name = name;
+        //}
 
         public int Height { get; }
         public int Width { get; }
         public string Name { get; }
 
         // about columns
-        public int[][] ColumnClues { get; }
+        public int[][] ColumnClues { get; private set; }
 
         // about rows
-        public int[][] RowClues { get; }
+        public int[][] RowClues { get; private set; }
 
         public bool?[,] Grid { get; }
+
+        public double Completeness
+        {
+            get
+            {
+                int done = 0;
+                for (int row = 0; row < this.Height; row++)
+                {
+                    for (int col = 0; col < this.Width; col++)
+                    {
+                        if (this.Grid[row, col].HasValue)
+                        {
+                            done++;
+                        }
+                    }
+                }
+
+                return ((double)done) / (this.Height * this.Width);
+            }
+        }
+
+        public void SetColumnClues(int[][] columnClues)
+        {
+            // sanity check
+            if (columnClues.GetLength(0) != this.Width)
+            {
+                throw new ArgumentException($"The size of the array should be {this.Width}, not {columnClues.GetLength(0)}");
+            }
+
+            this.ColumnClues = columnClues;
+        }
+
+        public void SetColumnClues(string columnClues)
+        {
+            var cols = columnClues.Split(';').Select(s => s.Trim()).ToArray();
+            this.ColumnClues = cols.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
+
+            if (this.ColumnClues.GetLength(0) != this.Width)
+            {
+                throw new ArgumentException($"The size of the array should be {this.Width}, not {this.ColumnClues.GetLength(0)}");
+            }
+        }
+
+        public void SetRowClues(int[][] rowClues)
+        {
+            // sanity check
+            if (rowClues.GetLength(0) != this.Height)
+            {
+                throw new ArgumentException($"The size of the array should be {this.Height}, not {rowClues.GetLength(0)}");
+            }
+
+            this.RowClues = rowClues;
+        }
+
+        public void SetRowClues(string rowClues)
+        {
+            var rows = rowClues.Split(';').Select(s => s.Trim()).ToArray();
+            this.RowClues = rows.Select(s => string.IsNullOrEmpty(s) ? new int[0] : s.Split(',').Select(c => int.Parse(c)).ToArray()).ToArray();
+
+            // sanity check
+            if (this.RowClues.GetLength(0) != this.Height)
+            {
+                throw new ArgumentException($"The size of the array should be {this.Height}, not {this.RowClues.GetLength(0)}");
+            }
+        }
 
         // set the value for this position, return whether the value was changed
         public bool SetValue(int col, int row, bool value)
@@ -102,10 +175,10 @@ namespace GriddlerSolver
             return sb.ToString();
         }
 
-        private static void SanityCheck(int[][] columnClues, int[][] rowClues)
+        public void SanityCheck()
         {
-            var colblacks = columnClues.Select(a => a.Sum()).Sum();
-            var rowblacks = rowClues.Select(a => a.Sum()).Sum();
+            var colblacks = this.ColumnClues.Select(a => a.Sum()).Sum();
+            var rowblacks = this.RowClues.Select(a => a.Sum()).Sum();
 
             if (colblacks != rowblacks)
             {
