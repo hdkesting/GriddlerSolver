@@ -81,7 +81,7 @@ namespace GriddlerSolver
             // sanity check
             if (columnClues.GetLength(0) != this.Width)
             {
-                throw new ArgumentException($"The size of the array should be {this.Width}, not {columnClues.GetLength(0)}");
+                throw new ArgumentException($"The size of the column array should be {this.Width}, not {columnClues.GetLength(0)}");
             }
 
             this.ColumnClues = columnClues;
@@ -94,7 +94,7 @@ namespace GriddlerSolver
 
             if (this.ColumnClues.GetLength(0) != this.Width)
             {
-                throw new ArgumentException($"The size of the array should be {this.Width}, not {this.ColumnClues.GetLength(0)}");
+                throw new ArgumentException($"The size of the column array should be {this.Width}, not {this.ColumnClues.GetLength(0)}");
             }
         }
 
@@ -103,7 +103,7 @@ namespace GriddlerSolver
             // sanity check
             if (rowClues.GetLength(0) != this.Height)
             {
-                throw new ArgumentException($"The size of the array should be {this.Height}, not {rowClues.GetLength(0)}");
+                throw new ArgumentException($"The size of the row array should be {this.Height}, not {rowClues.GetLength(0)}");
             }
 
             this.RowClues = rowClues;
@@ -117,7 +117,7 @@ namespace GriddlerSolver
             // sanity check
             if (this.RowClues.GetLength(0) != this.Height)
             {
-                throw new ArgumentException($"The size of the array should be {this.Height}, not {this.RowClues.GetLength(0)}");
+                throw new ArgumentException($"The size of the row array should be {this.Height}, not {this.RowClues.GetLength(0)}");
             }
         }
 
@@ -182,7 +182,7 @@ namespace GriddlerSolver
 
             if (colblacks != rowblacks)
             {
-                throw new InvalidOperationException("The number of black fields must match between rows and columns.");
+                throw new InvalidOperationException($"The number of black fields must match between rows and columns. In cols: {colblacks}, in rows: {rowblacks}.");
             }
         }
     }

@@ -8,18 +8,21 @@ namespace GriddlerSolver
         private readonly Queue<LineDefinition> processQueue = new Queue<LineDefinition>();
         private readonly Griddler game;
 
-        public double Completeness => game.Completeness;
+        private readonly Dictionary<int, List<bool[]>> rowPermutations = new Dictionary<int, List<bool[]>>();
+        private readonly Dictionary<int, List<bool[]>> columnPermutations = new Dictionary<int, List<bool[]>>();
+
+        public double Completeness => this.game.Completeness;
 
         public Solver(Griddler griddler)
         {
             for (int i = 0; i < griddler.Width; i++)
             {
-                processQueue.Enqueue(new LineDefinition(GroupType.Column, i));
+                this.processQueue.Enqueue(new LineDefinition(GroupType.Column, i));
             }
 
             for (int i = 0; i < griddler.Height; i++)
             {
-                processQueue.Enqueue(new LineDefinition(GroupType.Row, i));
+                this.processQueue.Enqueue(new LineDefinition(GroupType.Row, i));
             }
 
             this.game = griddler;
@@ -27,12 +30,32 @@ namespace GriddlerSolver
 
         public IEnumerable<Griddler> Solve()
         {
-            while (processQueue.Any())
+            while (this.processQueue.Any())
             {
-                var (group, index) = processQueue.Dequeue();
+                var (group, index) = this.processQueue.Dequeue();
 
-                var pattern = group == GroupType.Column ? game.ColumnClues[index] : game.RowClues[index];
-                var existing = game.GetGroup(group, index);
+                var pattern = group == GroupType.Column ? this.game.ColumnClues[index] : this.game.RowClues[index];
+                List<bool[]> options;
+
+                // find the permutations, or calculate (and store) them
+                if (group == GroupType.Column)
+                {
+                    if (!this.columnPermutations.TryGetValue(index, out options))
+                    {
+                        options = this.MakePermutations(pattern, this.game.GetGroupSize(group)).ToList();
+                        this.columnPermutations.Add(index, options);
+                    }
+                }
+                else
+                {
+                    if (!this.rowPermutations.TryGetValue(index, out options))
+                    {
+                        options = this.MakePermutations(pattern, this.game.GetGroupSize(group)).ToList();
+                        this.rowPermutations.Add(index, options);
+                    }
+                }
+
+                var existing = this.game.GetGroup(group, index);
 
                 if (existing.All(x => x.HasValue))
                 {
@@ -40,15 +63,13 @@ namespace GriddlerSolver
                     continue;
                 }
 
-                var options = MakePermutations(pattern, game.GetGroupSize(group))
-                    .Where(p => MatchesExisting(p, existing))
-                    .ToList();
+                // remove permutations that are impossible, given the current grid
+                options.RemoveAll(p => !this.MatchesExisting(p, existing));
 
                 bool foundone = false;
-                //options.Dump();
                 // are there positions that have the same values in all remaining options?
                 // then set that value
-                // if value was changed, then add both column and row to queue
+                // if value was changed, then the crossing line to queue
                 if (options.Any())
                 {
                     var merged = this.Merge(options);
@@ -60,23 +81,22 @@ namespace GriddlerSolver
                             existing[i] = merged[i];
                             if (group == GroupType.Row)
                             {
-                                game.SetValue(i, index, merged[i].Value);
+                                this.game.SetValue(i, index, merged[i].Value);
                             }
                             else
                             {
-                                game.SetValue(index, i, merged[i].Value);
+                                this.game.SetValue(index, i, merged[i].Value);
                             }
 
                             foundone = true;
-                            processQueue.Enqueue(new LineDefinition(group == GroupType.Row ? GroupType.Column : GroupType.Row, i));
+                            this.processQueue.Enqueue(new LineDefinition(group == GroupType.Row ? GroupType.Column : GroupType.Row, i));
                         }
                     }
                 }
 
-                //queue.Count.Dump("Queue count");
                 if (foundone)
                 {
-                    yield return game;
+                    yield return this.game;
                 }
             }
         }
@@ -120,7 +140,7 @@ namespace GriddlerSolver
 
         private IEnumerable<bool[]> MakePermutations(int[] blockPattern, int size)
         {
-            foreach (var result in MakePermutations(new bool?[size], blockPattern, 0))
+            foreach (var result in this.MakePermutations(new bool?[size], blockPattern, 0))
             {
                 yield return result;
             }
@@ -146,8 +166,8 @@ namespace GriddlerSolver
 
             for (int s = start; s <= size - restLength - thisBlockLength; s++)
             {
-                var newline = FillArray(fillPattern, s, thisBlockLength);
-                foreach (var line in MakePermutations(newline, restPattern, s + thisBlockLength + 1))
+                var newline = this.FillArray(fillPattern, s, thisBlockLength);
+                foreach (var line in this.MakePermutations(newline, restPattern, s + thisBlockLength + 1))
                 {
                     yield return line;
                 }
